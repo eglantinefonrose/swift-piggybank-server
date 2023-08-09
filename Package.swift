@@ -1,20 +1,23 @@
-// swift-tools-version:5.8
+// swift-tools-version:5.7
 import PackageDescription
 
 let package = Package(
-    name: "hello",
+    name: "piggyBankServer",
     platforms: [
+        .iOS(.v13),
        .macOS(.v12)
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.76.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.76.0")
+        //.package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.14.1")
     ],
     targets: [
         .executableTarget(
             name: "App",
             dependencies: [
-                .product(name: "Vapor", package: "vapor")
+              .product(name: "Vapor", package: "vapor")
+              //.product(name: "SQLite", package: "SQLite.swift")
             ],
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of

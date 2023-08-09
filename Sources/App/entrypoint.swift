@@ -22,11 +22,16 @@ private extension Vapor.Application {
 
 @main
 enum Entrypoint {
+    
     static func main() async throws {
         var env = try Environment.detect()
         try LoggingSystem.bootstrap(from: &env)
         
         let app = Application(env)
+        
+        // Make the server listen on all IP addresses of the machine
+        app.http.server.configuration.hostname = "0.0.0.0"
+
         defer { app.shutdown() }
         
         do {
@@ -36,5 +41,7 @@ enum Entrypoint {
             throw error
         }
         try await app.runFromAsyncMainEntrypoint()
+
     }
+    
 }
