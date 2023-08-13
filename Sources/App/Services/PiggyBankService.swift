@@ -10,30 +10,90 @@ import Foundation
 
 public struct PiggyBankService {
     
+    ///
+    ///
+    /// throws
+    ///     case accountAlreadyExists
+    ///
+    func createBankAccount(accountId: String, amount: Float, currency: String, firstName: String, lastName: String) throws -> BankAccountDTO {
+        return try createBankAccount(accountId: accountId, amount: amount, currency: currency, firstName: firstName, lastName: lastName, isOverdraftAllowed: 0, overDraftLimit: nil)
+    }
+
+    ///
+    /// throws
+    ///     case accountAlreadyExists
+    ///     case overDraftLimitUndefined
+    ///     case overDraftMustBeNegative
+    ///
+    func createBankAccount(accountId: String, amount: Float, currency: String, firstName: String, lastName: String, isOverdraftAllowed: Int, overDraftLimit: Float?) throws -> BankAccountDTO {
+        
+        if ( (isOverdraftAllowed == 1) && (overDraftLimit == nil) )                                     { throw PiggyBankError.overDraftLimitUndefined }
+        if ( (isOverdraftAllowed == 1) && (overDraftLimit! > 0) )                                       { throw PiggyBankError.overDraftMustBeNegative }
+        if (PiggyBankServerDataStorageService.shared.loadBankAccount(accountId: accountId) != nil) { throw PiggyBankError.accountAlreadyExists }
+            
+        let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: amount, theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overDraftLimit);
+        PiggyBankServerDataStorageService.shared.storeBankAccount(accountToBeStored: theNewBankAccount)
+        return theNewBankAccount
+
+    }
+
+    
+    
     
     // Permet la réalisation d'un paiement depuis un compte bancaire
-    func makePayment(timeEpoch, date, accountId, amount, currency) -> BankAccountDTO {
+    func makePayment(accountId:String, amount:Float, currency:String) throws -> BankAccountDTO {
 
-        print("Virement effectué pour un montant de [\(amount) \(currency)] vers le compte [\(accountId)] at [\(date)]");
+        let timeEpoch = Int(NSDate().timeIntervalSince1970)
+        let date = Date(timeIntervalSinceNow: 0)
+        
+        print("Virement effectué pour un montant de [\(amount) \(currency)] vers le compte [\(accountId)] at [\(date)]/[\(timeEpoch)]");
 
-        let amountAsFloat : Float = Float(amount) ?? -13.37
         do {
             // Charge l'état actuel du compte bancaire depuis la base de données
-            let bankAccount = PiggyBankServerDataStorageService.shared.loadBankAccount(accountId)
+            let bankAccount = PiggyBankServerDataStorageService.shared.loadBankAccount(accountId: accountId)
             
             // Effectue le virement
-            let bankAccount = try BankAccount(theAccountId:accountId, theAmount: amountAsFloat, theCurrency:currency, theFirstName: "", theLastName: "")
+            //let bankAccount = try BankAccountDTO(theAccountId:accountId, theAmount: amount, theCurrency:currency, theFirstName: "", theLastName: "")
             
             // Stocke le résultat dans la base
-            PiggyBankServerDataStorageService.shared.storeBankAccount(bankAccount.getBankAccountDTO())
+            PiggyBankServerDataStorageService.shared.storeBankAccount(accountToBeStored: bankAccount!)
             
             // Renvoie le nouvel état du compte bancaire à l'appelant
-            return bankAccount.getBankAccountDTO()
+            return bankAccount!
         } catch {
-            return BankAccountDTO(firstName: "", lastName: "", accountId: "", accountBalance: 0.0, currency: "", isOverdraftAllowed: false)
+            throw PiggyBankError.unknownAccount
         }
 
     }
+    
+    
+    
+    
+    //
+    //
+    // IMPLEMENTATION
+    //
+    //
+    
+//    /// Add the amount specified to the balance of the account
+//    private func addAmount(theAmount: Float, theCurrency: String) throws {
+//        guard (theCurrency == self.currency) else { throw PiggyBankError.inconsistentCurrency }
+//
+//        self.accountBalance = self.accountBalance + theAmount
+//    }
+//
+//    private func makePayment(thePaymentAmount: Float, theCurrency: String) throws {
+//        guard (theCurrency == self.currency) else { throw PiggyBankError.inconsistentCurrency }
+//        if ( (self.isOverdraftAllowed==true) && ((self.accountBalance-thePaymentAmount) < self.overDraftLimit!) ) { throw PiggyBankError.insufficientOverdraftLimitExceeded }
+//        if ( (self.isOverdraftAllowed==false) && (self.accountBalance < thePaymentAmount) )                       {
+//            throw PiggyBankError.insufficientAccountBalance(message:"You would need \(thePaymentAmount-self.accountBalance) more \(self.currency) on your account")
+//        }
+//
+//        self.accountBalance = self.accountBalance - thePaymentAmount
+//    }
+    
+    
+    
     
     
     

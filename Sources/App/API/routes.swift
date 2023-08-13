@@ -27,23 +27,28 @@ func routes(_ app: Application) throws {
         return "<html><h2><b>Salug \(name)</b></h2> [\(timeEpoch)]!</html>"
     }
     
+    
     // makePayment/toAccount/231231231/withAmount/120/EUR
-    app.get("makePayment", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async -> BankAccountDTO in
+    app.get("makePayment", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
-        let timeEpoch = Int(NSDate().timeIntervalSince1970)
-        let date = Date(timeIntervalSinceNow: 0)
         let accountId = req.parameters.get("accountId")!
-        let amount = req.parameters.get("amount")!
+        let amount : Float  = Float(req.parameters.get("amount")!) ?? -13.37
         let currency = req.parameters.get("currency")!
         
-        return PiggyBankService.shared.makePayment(timeEpoch, date, accountId, amount, currency)
+        return try PiggyBankService.shared.makePayment(accountId: accountId, amount: amount, currency: currency)
         
     }
     
+    
     // getBankAccount/231231231
-    app.get("getBankAccount", ":accountId") { req async -> BankAccountDTO in
+    app.get("getBankAccount", ":accountId") { req async throws -> BankAccountDTO in
         let accountId = req.parameters.get("accountId")!
-        return PiggyBankServerDataStorageService.shared.getBankAccountDTO(accountId: accountId)
+        do {
+            return try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: accountId)
+        } catch {
+            print("RROR GRVE")
+            throw PiggyBankError.overDraftMustBeNegative
+        }
     }
 
     
