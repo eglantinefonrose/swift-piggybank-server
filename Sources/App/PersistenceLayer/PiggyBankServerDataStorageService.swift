@@ -33,7 +33,7 @@ class PiggyBankServerDataStorageService {
             isOverdraftAllowed = Expression<Int64>("isOverdraftAllowed")
             overDraftLimit = Expression<Float64>("overdraftLimit")
 
-            if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
+            /*if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
                 try db.run(bankAccountsDTO.create { (t) in
                     t.column(accountId, primaryKey: true)
                     t.column(firstName)
@@ -66,7 +66,7 @@ class PiggyBankServerDataStorageService {
 
                 UserDefaults.standard.set(true, forKey: "is_db_created")
 
-            }
+            }*/
 
             print("-- dbmanager init --")
 
@@ -113,13 +113,31 @@ class PiggyBankServerDataStorageService {
 
     }
     
+    public func test() throws {
+        
+        do {
+            try db.run(bankAccountsDTO.insert (
+                accountId <- "454U3I54",
+                firstName <- "Malo",
+                lastName <- "Fonrose",
+                accountBalance <- 0,
+                currency <- "EUR",
+                isOverdraftAllowed <- 0,
+                overDraftLimit <- 0
+            ))
+        }
+        catch {
+            throw PiggyBankError.technicalError
+        }
+        
+    }
+    
     public func updateAccountBalanceInDb(selectedBankAccountID: String, paymentAmount: Float, theCurrency: String) throws -> BankAccountDTO {
         
         do {
             
             let bankAccountDTO = bankAccountsDTO.filter(accountId == selectedBankAccountID)
             let newBankAccountDTO = try PiggyBankService.shared.makePayment(accountId: selectedBankAccountID, thePaymentAmount: Float64(paymentAmount), currency: theCurrency)
-            
             try db.run(bankAccountDTO.delete())
             
             try db.run(bankAccountsDTO.insert (
@@ -132,6 +150,8 @@ class PiggyBankServerDataStorageService {
                 overDraftLimit <- newBankAccountDTO.getOverdraftLimit()
             ))
             
+            print("Paiement d'un montant de \(paymentAmount) \(theCurrency) realisé avec succès à partir du compte \(String(describing: accountId))")
+            print("Nouveau solde : \(newBankAccountDTO.getAccountBalance())")
             return try getBankAccountDTO(selectedAccountId: selectedBankAccountID)
             
         }

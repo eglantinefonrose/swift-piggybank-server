@@ -75,12 +75,12 @@ public struct BankAccountDTO : Content {
         return "\(self.accountBalance) \(self.currency)"
     }
     
-    public func setAccountBalance(newAccountBalance: Float, bankAccountDTO: BankAccountDTO) -> BankAccountDTO {
+    public func setAccountBalance(newAccountBalance: Float64, bankAccountDTO: BankAccountDTO) -> BankAccountDTO {
         var newBankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 0, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
         newBankAccountDTO.firstName = bankAccountDTO.firstName
         newBankAccountDTO.lastName = bankAccountDTO.lastName
         newBankAccountDTO.accountId = bankAccountDTO.accountId
-        newBankAccountDTO.accountBalance = bankAccountDTO.accountBalance
+        newBankAccountDTO.accountBalance = newAccountBalance
         newBankAccountDTO.currency = bankAccountDTO.currency
         newBankAccountDTO.isOverdraftAllowed = bankAccountDTO.isOverdraftAllowed
         newBankAccountDTO.overDraftLimit = bankAccountDTO.overDraftLimit

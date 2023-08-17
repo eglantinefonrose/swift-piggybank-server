@@ -36,7 +36,7 @@ func routes(_ app: Application) throws {
         let currency = req.parameters.get("currency")!
         
         //return try PiggyBankService.shared.makePayment(accountId: accountId, thePaymentAmount: Float64(amount), currency: currency)
-        return try PiggyBankServerDataStorageService.shared.updateAccountBalanceInDb(selectedBankAccountID: accountId, paymentAmount: amount, theCurrency: currency)
+        return try PiggyBankServerDataStorageService.shared.updateAccountBalanceInDb(selectedBankAccountID: "38469403805", paymentAmount: amount, theCurrency: currency)
         
     }
     

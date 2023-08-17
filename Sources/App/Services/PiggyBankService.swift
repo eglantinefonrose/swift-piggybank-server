@@ -84,7 +84,7 @@ public struct PiggyBankService {
             }
 
             let bankAccountAmount = bankAccount.getAccountBalance() - thePaymentAmount
-            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float(bankAccountAmount), bankAccountDTO: bankAccount)
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
             
             return newBankAccountDTO
                 
