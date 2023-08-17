@@ -15,26 +15,26 @@ public struct BankAccountDTO : Content {
     private var firstName: String
     private var lastName: String
     private var accountId: String
-    private var accountBalance: Float
+    private var accountBalance: Float64
     private var currency: String
-    private var isOverdraftAllowed: Int
-    private var overDraftLimit: Float?
+    private var isOverdraftAllowed: Int64
+    private var overDraftLimit: Float64?
 
     
     /// Construtor (for Accounts without Overdraft)
     public init (theAccountId: String, theAmount: Float, theCurrency: String, theFirstName: String, theLastName: String) {
-        self.init(theAccountId: theAccountId, theAmount: theAmount, theCurrency: theCurrency, theFirstName: theFirstName, theLastName: theLastName, isOverdraftAllowed: 0, theOverDraftLimit: nil)
+        self.init(theAccountId: theAccountId, theAmount: Float64(theAmount), theCurrency: theCurrency, theFirstName: theFirstName, theLastName: theLastName, isOverdraftAllowed: 0, theOverDraftLimit: nil)
     }
 
     /// Construtor
-    public init (theAccountId: String, theAmount: Float, theCurrency: String, theFirstName: String, theLastName: String, isOverdraftAllowed: Int, theOverDraftLimit: Float?) {
+    public init (theAccountId: String, theAmount: Float64, theCurrency: String, theFirstName: String, theLastName: String, isOverdraftAllowed: Int, theOverDraftLimit: Float?) {
         self.accountId = theAccountId
-        self.accountBalance = theAmount
+        self.accountBalance = Float64(theAmount)
         self.firstName = theFirstName
         self.lastName = theLastName
         self.currency = theCurrency
-        self.isOverdraftAllowed = isOverdraftAllowed
-        self.overDraftLimit = theOverDraftLimit
+        self.isOverdraftAllowed = Int64(isOverdraftAllowed)
+        self.overDraftLimit = Float64(theCurrency)
     }
     
 
@@ -43,11 +43,19 @@ public struct BankAccountDTO : Content {
     // Property accessors
     //
     
-    public func getAccountOwnerName() -> String {
-        return "\(self.firstName) \(self.lastName)"
+    public func getAccountAccountId() -> String {
+        return self.accountId
     }
     
-    public func getAccountBalance() -> Float {
+    public func getAccountOwnerFirstName() -> String {
+        return self.firstName
+    }
+    
+    public func getAccountOwnerLastName() -> String {
+        return self.lastName
+    }
+    
+    public func getAccountBalance() -> Float64 {
         return self.accountBalance
     }
     
@@ -55,12 +63,12 @@ public struct BankAccountDTO : Content {
         return self.currency
     }
     
-    public func getOverdraftAuthorization() -> Int {
+    public func getOverdraftAuthorization() -> Int64 {
         return self.isOverdraftAllowed
     }
     
-    public func getOverdraftLimit() -> Float {
-        return self.overDraftLimit ?? 0
+    public func getOverdraftLimit() -> Float64 {
+        return Float64(self.overDraftLimit ?? 0)
     }
 
     public func getAccountBalanceWithCurrency() -> String {

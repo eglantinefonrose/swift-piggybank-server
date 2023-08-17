@@ -31,7 +31,7 @@ public struct PiggyBankService {
         if ( (isOverdraftAllowed == 1) && (overDraftLimit! > 0) )                                       { throw PiggyBankError.overDraftMustBeNegative }
         if (PiggyBankServerDataStorageService.shared.loadBankAccount(accountId: accountId) != nil) { throw PiggyBankError.accountAlreadyExists }
             
-        let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: amount, theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overDraftLimit);
+        let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: Float64(amount), theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overDraftLimit);
         PiggyBankServerDataStorageService.shared.storeBankAccount(accountToBeStored: theNewBankAccount)
         return theNewBankAccount
 
@@ -69,7 +69,7 @@ public struct PiggyBankService {
     }*/
     
     
-    func makePayment(accountId: String, thePaymentAmount: Float, currency: String) throws -> BankAccountDTO {
+    func makePayment(accountId: String, thePaymentAmount: Float64, currency: String) throws -> BankAccountDTO {
         
         let date = Date(timeIntervalSinceNow: 0)
         
@@ -84,7 +84,7 @@ public struct PiggyBankService {
             }
 
             let bankAccountAmount = bankAccount.getAccountBalance() - thePaymentAmount
-            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: bankAccountAmount, bankAccountDTO: bankAccount)
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float(bankAccountAmount), bankAccountDTO: bankAccount)
             
             return newBankAccountDTO
                 

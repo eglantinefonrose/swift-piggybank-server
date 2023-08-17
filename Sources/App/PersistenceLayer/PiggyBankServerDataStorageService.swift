@@ -95,7 +95,7 @@ class PiggyBankServerDataStorageService {
                 let bankAccountisOverdraftAllowed = row[isOverdraftAllowed]
                 let bankAccounttheOverDraftLimit = row[overDraftLimit]
                 
-                bankAccountDTO = BankAccountDTO(theAccountId: bankAccountID, theAmount: Float(bankAccountAmount), theCurrency: bankAccountCurrency, theFirstName: bankAccountFirstName, theLastName: bankAccountLastName, isOverdraftAllowed: Int(bankAccountisOverdraftAllowed), theOverDraftLimit: Float(bankAccounttheOverDraftLimit))
+                bankAccountDTO = BankAccountDTO(theAccountId: bankAccountID, theAmount: Float64(Float(bankAccountAmount)), theCurrency: bankAccountCurrency, theFirstName: bankAccountFirstName, theLastName: bankAccountLastName, isOverdraftAllowed: Int(bankAccountisOverdraftAllowed), theOverDraftLimit: Float(bankAccounttheOverDraftLimit))
                 print("firstName \(bankAccountFirstName)")
                 
                 return bankAccountDTO
@@ -111,6 +111,35 @@ class PiggyBankServerDataStorageService {
 
         //return try BankAccountDTO(theAccountId: "5140124I234", theAmount: 123.10, theCurrency: "EUR", theFirstName: "Nicolas", theLastName: "Fonrose")
 
+    }
+    
+    public func updateAccountBalanceInDb(selectedBankAccountID: String, paymentAmount: Float, theCurrency: String) throws -> BankAccountDTO {
+        
+        do {
+            
+            let bankAccountDTO = bankAccountsDTO.filter(accountId == selectedBankAccountID)
+            let newBankAccountDTO = try PiggyBankService.shared.makePayment(accountId: selectedBankAccountID, thePaymentAmount: Float64(paymentAmount), currency: theCurrency)
+            
+            try db.run(bankAccountDTO.delete())
+            
+            try db.run(bankAccountsDTO.insert (
+                accountId <- selectedBankAccountID,
+                firstName <- newBankAccountDTO.getAccountOwnerFirstName(),
+                lastName <- newBankAccountDTO.getAccountOwnerLastName(),
+                accountBalance <- newBankAccountDTO.getAccountBalance(),
+                currency <- newBankAccountDTO.getCurrency(),
+                isOverdraftAllowed <- newBankAccountDTO.getOverdraftAuthorization(),
+                overDraftLimit <- newBankAccountDTO.getOverdraftLimit()
+            ))
+            
+            return try getBankAccountDTO(selectedAccountId: selectedBankAccountID)
+            
+        }
+        catch {
+            throw PiggyBankError.technicalError
+        }
+                                         
+       //replace(selectedBankAccountDTO.getAccountBalance(), with: PiggyBankService().makePayment(accountId: selectedAccountID, thePaymentAmount: paymentAmount))
     }
 
     ///
