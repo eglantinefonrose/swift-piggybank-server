@@ -35,7 +35,7 @@ func routes(_ app: Application) throws {
         let amount : Float  = Float(req.parameters.get("amount")!) ?? -13.37
         let currency = req.parameters.get("currency")!
         
-        return try PiggyBankService.shared.makePayment(accountId: accountId, amount: amount, currency: currency)
+        return try PiggyBankService.shared.makePayment(accountId: accountId, thePaymentAmount: amount, currency: currency)
         
     }
     

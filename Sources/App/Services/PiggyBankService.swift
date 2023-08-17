@@ -41,7 +41,7 @@ public struct PiggyBankService {
     
     
     // Permet la réalisation d'un paiement depuis un compte bancaire
-    func makePayment(accountId:String, amount:Float, currency:String) throws -> BankAccountDTO {
+    /*func makePayment(accountId:String, amount:Float, currency:String) throws -> BankAccountDTO {
 
         let timeEpoch = Int(NSDate().timeIntervalSince1970)
         let date = Date(timeIntervalSinceNow: 0)
@@ -50,22 +50,50 @@ public struct PiggyBankService {
 
         do {
             // Charge l'état actuel du compte bancaire depuis la base de données
-            let bankAccount = PiggyBankServerDataStorageService.shared.loadBankAccount(accountId: accountId)
+            if let bankAccount = PiggyBankServerDataStorageService.shared.loadBankAccount(accountId: accountId) {
+                // Effectue le virement
+                let bankAccount = try BankAccountDTO(theAccountId:accountId, theAmount: amount, theCurrency:currency, theFirstName: "", theLastName: "")
+                
+                // Stocke le résultat dans la base
+                PiggyBankServerDataStorageService.shared.storeBankAccount(accountToBeStored: bankAccount)
+                
+                // Renvoie le nouvel état du compte bancaire à l'appelant
+                return bankAccount
+            } else {
+                print("unknown account")
+                throw PiggyBankError.unknownAccount
+            }
             
-            // Effectue le virement
-            //let bankAccount = try BankAccountDTO(theAccountId:accountId, theAmount: amount, theCurrency:currency, theFirstName: "", theLastName: "")
-            
-            // Stocke le résultat dans la base
-            PiggyBankServerDataStorageService.shared.storeBankAccount(accountToBeStored: bankAccount!)
-            
-            // Renvoie le nouvel état du compte bancaire à l'appelant
-            return bankAccount!
-        } catch {
-            throw PiggyBankError.unknownAccount
         }
 
-    }
+    }*/
     
+    
+    func makePayment(accountId: String, thePaymentAmount: Float, currency: String) throws -> BankAccountDTO {
+        
+        let date = Date(timeIntervalSinceNow: 0)
+        
+        do {
+            // Charge l'état actuel du compte bancaire depuis la base de données
+            let bankAccount = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: accountId)
+            
+            guard (currency == bankAccount.getCurrency()) else { throw PiggyBankError.inconsistentCurrency }
+            if ( (bankAccount.getOverdraftAuthorization()==1) && (Int((bankAccount.getAccountBalance() - thePaymentAmount)) < Int(bankAccount.getOverdraftLimit())) ) { throw PiggyBankError.insufficientOverdraftLimitExceeded }
+            if ( (bankAccount.getOverdraftAuthorization()==0) && (bankAccount.getAccountBalance() < thePaymentAmount) )                       {
+                throw PiggyBankError.insufficientAccountBalance(message:"You would need \(thePaymentAmount - bankAccount.getAccountBalance()) more \(bankAccount.getCurrency()) on your account")
+            }
+
+            let bankAccountAmount = bankAccount.getAccountBalance() - thePaymentAmount
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: bankAccountAmount, bankAccountDTO: bankAccount)
+            
+            return newBankAccountDTO
+                
+        }
+        catch {
+            throw PiggyBankError.unknownAccount
+        }
+        
+    }
     
     
     

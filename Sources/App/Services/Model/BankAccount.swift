@@ -54,9 +54,29 @@ public struct BankAccountDTO : Content {
     public func getCurrency() -> String {
         return self.currency
     }
+    
+    public func getOverdraftAuthorization() -> Int {
+        return self.isOverdraftAllowed
+    }
+    
+    public func getOverdraftLimit() -> Float {
+        return self.overDraftLimit ?? 0
+    }
 
     public func getAccountBalanceWithCurrency() -> String {
         return "\(self.accountBalance) \(self.currency)"
+    }
+    
+    public func setAccountBalance(newAccountBalance: Float, bankAccountDTO: BankAccountDTO) -> BankAccountDTO {
+        var newBankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 0, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
+        newBankAccountDTO.firstName = bankAccountDTO.firstName
+        newBankAccountDTO.lastName = bankAccountDTO.lastName
+        newBankAccountDTO.accountId = bankAccountDTO.accountId
+        newBankAccountDTO.accountBalance = bankAccountDTO.accountBalance
+        newBankAccountDTO.currency = bankAccountDTO.currency
+        newBankAccountDTO.isOverdraftAllowed = bankAccountDTO.isOverdraftAllowed
+        newBankAccountDTO.overDraftLimit = bankAccountDTO.overDraftLimit
+        return newBankAccountDTO
     }
 
 }
