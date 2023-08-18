@@ -132,7 +132,84 @@ class PiggyBankServerDataStorageService {
         
     }
     
-    public func updateAccountBalanceInDb(selectedBankAccountID: String, paymentAmount: Float, theCurrency: String) throws -> BankAccountDTO {
+    func makePayment(selectedBankAccountID: String, thePaymentAmount: Float64, theCurrency: String) throws -> BankAccountDTO {
+        
+        let date = Date(timeIntervalSinceNow: 0)
+        
+        do {
+            // Charge l'état actuel du compte bancaire depuis la base de données
+            let bankAccount = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: selectedBankAccountID)
+            
+            guard (theCurrency == bankAccount.getCurrency()) else { throw PiggyBankError.inconsistentCurrency }
+            if ( (bankAccount.getOverdraftAuthorization()==1) && (Int((bankAccount.getAccountBalance() - thePaymentAmount)) < Int(bankAccount.getOverdraftLimit())) ) { throw PiggyBankError.insufficientOverdraftLimitExceeded }
+            if ( (bankAccount.getOverdraftAuthorization()==0) && (bankAccount.getAccountBalance() < thePaymentAmount) )                       {
+                throw PiggyBankError.insufficientAccountBalance(message:"You would need \(thePaymentAmount - bankAccount.getAccountBalance()) more \(bankAccount.getCurrency()) on your account")
+            }
+
+            let bankAccountAmount = bankAccount.getAccountBalance() - thePaymentAmount
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            let oldBankAccountDTO = bankAccountsDTO.filter(accountId == selectedBankAccountID)
+            try db.run(oldBankAccountDTO.delete())
+            
+            try db.run(bankAccountsDTO.insert (
+                accountId <- selectedBankAccountID,
+                firstName <- newBankAccountDTO.getAccountOwnerFirstName(),
+                lastName <- newBankAccountDTO.getAccountOwnerLastName(),
+                accountBalance <- newBankAccountDTO.getAccountBalance(),
+                currency <- newBankAccountDTO.getCurrency(),
+                isOverdraftAllowed <- newBankAccountDTO.getOverdraftAuthorization(),
+                overDraftLimit <- newBankAccountDTO.getOverdraftLimit()
+            ))
+            
+            print("Paiement d'un montant de \(thePaymentAmount) \(theCurrency) realisé avec succès à partir du compte \(String(describing: accountId))")
+            print("Nouveau solde : \(newBankAccountDTO.getAccountBalance())")
+            return try getBankAccountDTO(selectedAccountId: selectedBankAccountID)
+                
+        }
+        catch {
+            throw PiggyBankError.unknownAccount
+        }
+        
+    }
+    
+    func addMoney(selectedBankAccountID: String, thePaymentAmount: Float64, theCurrency: String) throws -> BankAccountDTO {
+        
+        let date = Date(timeIntervalSinceNow: 0)
+        
+        do {
+            // Charge l'état actuel du compte bancaire depuis la base de données
+            let bankAccount = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: selectedBankAccountID)
+            
+            guard (theCurrency == bankAccount.getCurrency()) else { throw PiggyBankError.inconsistentCurrency }
+            if thePaymentAmount > 100000 { throw PiggyBankError.abnormallyHighSum }
+
+            let bankAccountAmount = bankAccount.getAccountBalance() + thePaymentAmount
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            let oldBankAccountDTO = bankAccountsDTO.filter(accountId == selectedBankAccountID)
+            try db.run(oldBankAccountDTO.delete())
+            
+            try db.run(bankAccountsDTO.insert (
+                accountId <- selectedBankAccountID,
+                firstName <- newBankAccountDTO.getAccountOwnerFirstName(),
+                lastName <- newBankAccountDTO.getAccountOwnerLastName(),
+                accountBalance <- newBankAccountDTO.getAccountBalance(),
+                currency <- newBankAccountDTO.getCurrency(),
+                isOverdraftAllowed <- newBankAccountDTO.getOverdraftAuthorization(),
+                overDraftLimit <- newBankAccountDTO.getOverdraftLimit()
+            ))
+            
+            print("L'ajout d'un montant de \(thePaymentAmount) \(theCurrency) realisé avec succès à partir du compte \(String(describing: accountId))")
+            print("Nouveau solde : \(newBankAccountDTO.getAccountBalance())")
+            return try getBankAccountDTO(selectedAccountId: selectedBankAccountID)
+                
+        }
+        catch {
+            throw PiggyBankError.unknownAccount
+        }
+        
+    }
+    
+    /*public func updateAccountBalanceInDb(selectedBankAccountID: String, paymentAmount: Float, theCurrency: String) throws -> BankAccountDTO {
         
         do {
             
@@ -160,7 +237,7 @@ class PiggyBankServerDataStorageService {
         }
                                          
        //replace(selectedBankAccountDTO.getAccountBalance(), with: PiggyBankService().makePayment(accountId: selectedAccountID, thePaymentAmount: paymentAmount))
-    }
+    }*/
 
     ///
     ///

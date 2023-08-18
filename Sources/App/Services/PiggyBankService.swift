@@ -69,7 +69,7 @@ public struct PiggyBankService {
     }*/
     
     
-    func makePayment(accountId: String, thePaymentAmount: Float64, currency: String) throws -> BankAccountDTO {
+    /*func makePayment(accountId: String, thePaymentAmount: Float64, currency: String) throws -> BankAccountDTO {
         
         let date = Date(timeIntervalSinceNow: 0)
         
@@ -85,6 +85,31 @@ public struct PiggyBankService {
 
             let bankAccountAmount = bankAccount.getAccountBalance() - thePaymentAmount
             let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            
+            return newBankAccountDTO
+                
+        }
+        catch {
+            throw PiggyBankError.unknownAccount
+        }
+        
+    }*/
+    
+    
+    func addMoney(accountId: String, thePaymentAmount: Float64, currency: String) throws -> BankAccountDTO {
+        
+        let date = Date(timeIntervalSinceNow: 0)
+        
+        do {
+            // Charge l'état actuel du compte bancaire depuis la base de données
+            let bankAccount = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: accountId)
+            
+            guard (currency == bankAccount.getCurrency()) else { throw PiggyBankError.inconsistentCurrency }
+            if ( thePaymentAmount > 100000 ) { throw PiggyBankError.abnormallyHighSum }
+
+            let bankAccountAmount = bankAccount.getAccountBalance() + thePaymentAmount
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            print("Ajout d'argent réalisé avec succès d'un montant de \(thePaymentAmount) \(currency) sur le compte \(accountId) à \(date)")
             
             return newBankAccountDTO
                 

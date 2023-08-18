@@ -100,6 +100,7 @@ enum PiggyBankError: Error {
     case insufficientOverdraftLimitExceeded
     case overDraftLimitUndefined
     case overDraftMustBeNegative
+    case abnormallyHighSum
     
     case technicalError
 }

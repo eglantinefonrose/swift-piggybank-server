@@ -32,11 +32,20 @@ func routes(_ app: Application) throws {
     app.get("makePayment", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
         let accountId = req.parameters.get("accountId")!
-        let amount : Float  = Float(req.parameters.get("amount")!) ?? -13.37
+        let amount : Float64  = Float64(req.parameters.get("amount")!) ?? -13.37
         let currency = req.parameters.get("currency")!
         
-        //return try PiggyBankService.shared.makePayment(accountId: accountId, thePaymentAmount: Float64(amount), currency: currency)
-        return try PiggyBankServerDataStorageService.shared.updateAccountBalanceInDb(selectedBankAccountID: "38469403805", paymentAmount: amount, theCurrency: currency)
+        return try PiggyBankServerDataStorageService.shared.makePayment(selectedBankAccountID: accountId, thePaymentAmount: amount, theCurrency: currency)
+        
+    }
+    
+    app.get("addMoney", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
+                
+        let accountId = req.parameters.get("accountId")!
+        let amount : Float64  = Float64(req.parameters.get("amount")!) ?? -13.37
+        let currency = req.parameters.get("currency")!
+        
+        return try PiggyBankServerDataStorageService.shared.addMoney(selectedBankAccountID: accountId, thePaymentAmount: amount, theCurrency: currency)
         
     }
     
