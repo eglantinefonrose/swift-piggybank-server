@@ -86,23 +86,13 @@ func routes(_ app: Application) throws {
         }
     }
 
-    app.get("getSenderTransactions", ":accountId") { req async throws -> [TransactionDTO] in
+    app.get("getTransactions", ":accountId") { req async throws -> [TransactionDTO] in
         let accountId = req.parameters.get("accountId")!
         do {
-            return try PiggyBankServerDataStorageService.shared.getAllSenderTransactions(selectedAccountId: accountId)
+            return try PiggyBankServerDataStorageService.shared.getAllTransactions(selectedAccountId: accountId)
         } catch {
             print("RROR GRVE")
             throw PiggyBankError.technicalError
-        }
-    }
-    
-    app.get("getRecipientTransactions", ":accountId") { req async throws -> [TransactionDTO] in
-        let accountId = req.parameters.get("accountId")!
-        do {
-            return try PiggyBankServerDataStorageService.shared.getAllRecipientTransactions(selectedAccountId: accountId)
-        } catch {
-            print("RROR GRVE")
-            throw PiggyBankError.overDraftMustBeNegative
         }
     }
     

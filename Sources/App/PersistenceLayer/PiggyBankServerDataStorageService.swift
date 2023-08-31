@@ -132,48 +132,17 @@ class PiggyBankServerDataStorageService {
     }
     
     
-    public func getAllSenderTransactions(selectedAccountId:String) throws -> [TransactionDTO] {
+    public func getAllTransactions(selectedAccountId:String) throws -> [TransactionDTO] {
 
         var transactionsList : [TransactionDTO] = []
         
         do {
 
             // Requête pour récupérer la ligne où le champ "accountId" est "selectedAccountId"
-            let query = transactions.filter(transactionSenderBankAccountID == selectedAccountId)
-            
-            // Exécution de la requête et récupération du résultat
-            
-            for row in try db.prepare(query) {
-                let transactionID = row[transactionID]
-                let transactionSenderBankAccountID = row[transactionSenderBankAccountID]
-                let transactionRecipientBankAccountID = row[transactionRecipientAccountID]
-                let transactionPaymentAmount = row[transactionPaymentAmount]
-                let transactionCurrency = row[transactionCurrency]
-                let transactionDate = row[transactionDate]
-                
-                transactionsList.append(TransactionDTO(theId: transactionID, theSenderAccountID: transactionSenderBankAccountID, theRecipientAccountID: transactionRecipientBankAccountID, theAmount: transactionPaymentAmount, theCurrency: transactionCurrency, theDate: transactionDate))
-            }
-            
-        } catch let error as PiggyBankError {
-            // If the error is already a PiggyBank error (ie thrown by our code), we re-throw it as-is
-            throw error
-        } catch {
-            // If the error is any other error, we throw a 'PiggyBankError.technicalError'
-            throw PiggyBankError.technicalError
-        }
-
-        return transactionsList
-
-    }
-    
-    public func getAllRecipientTransactions(selectedAccountId:String) throws -> [TransactionDTO] {
-
-        var transactionsList : [TransactionDTO] = []
-        
-        do {
-
-            // Requête pour récupérer la ligne où le champ "accountId" est "selectedAccountId"
-            let query = transactions.filter(transactionRecipientAccountID == selectedAccountId)
+            let query = transactions
+                //.filter(transactionSenderBankAccountID == selectedAccountId)
+                .filter(transactionRecipientAccountID == selectedAccountId || transactionSenderBankAccountID == selectedAccountId)
+                .order(transactionDate.desc)
             
             // Exécution de la requête et récupération du résultat
             
