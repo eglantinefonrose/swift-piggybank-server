@@ -92,7 +92,7 @@ func routes(_ app: Application) throws {
             return try PiggyBankServerDataStorageService.shared.getAllSenderTransactions(selectedAccountId: accountId)
         } catch {
             print("RROR GRVE")
-            throw PiggyBankError.overDraftMustBeNegative
+            throw PiggyBankError.technicalError
         }
     }
     

@@ -349,7 +349,7 @@ class PiggyBankServerDataStorageService {
                 transactionRecipientAccountID <- recipientBankAccountID,
                 transactionPaymentAmount <- thePaymentAmount,
                 transactionCurrency <- theCurrency,
-                transactionDate <- jdFromDate(date: .now)
+                transactionDate <- Int64(NSDate().timeIntervalSince1970)
             ))
             
             //print("L'ajout d'un montant de \(thePaymentAmount) \(senderCurrency) realisé avec succès du compte \(senderBankAccountID) vers le compte \(recipientBankAccountID)")
@@ -420,8 +420,4 @@ class PiggyBankServerDataStorageService {
 
 }
 
-func jdFromDate(date : Date) -> Int64 {
-    let JD_JAN_1_1970_0000GMT = 2440587.5
-    return Int64(JD_JAN_1_1970_0000GMT + date.timeIntervalSince1970 / 86400)
-}
 
