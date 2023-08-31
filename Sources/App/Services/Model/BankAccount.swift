@@ -27,7 +27,7 @@ public struct BankAccountDTO : Content {
     }
 
     /// Construtor
-    public init (theAccountId: String, theAmount: Float64, theCurrency: String, theFirstName: String, theLastName: String, isOverdraftAllowed: Int, theOverDraftLimit: Float?) {
+    public init (theAccountId: String, theAmount: Float64, theCurrency: String, theFirstName: String, theLastName: String, isOverdraftAllowed: Int64, theOverDraftLimit: Float64?) {
         self.accountId = theAccountId
         self.accountBalance = Float64(theAmount)
         self.firstName = theFirstName
@@ -75,15 +75,15 @@ public struct BankAccountDTO : Content {
         return "\(self.accountBalance) \(self.currency)"
     }
     
-    public func setAccountBalance(newAccountBalance: Float64, bankAccountDTO: BankAccountDTO) -> BankAccountDTO {
-        var newBankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 0, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
-        newBankAccountDTO.firstName = bankAccountDTO.firstName
-        newBankAccountDTO.lastName = bankAccountDTO.lastName
-        newBankAccountDTO.accountId = bankAccountDTO.accountId
+    public func setAccountBalance(newAccountBalance: Float64) -> BankAccountDTO {
+        var newBankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 40, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
+        newBankAccountDTO.firstName = self.firstName
+        newBankAccountDTO.lastName = self.lastName
+        newBankAccountDTO.accountId = self.accountId
         newBankAccountDTO.accountBalance = newAccountBalance
-        newBankAccountDTO.currency = bankAccountDTO.currency
-        newBankAccountDTO.isOverdraftAllowed = bankAccountDTO.isOverdraftAllowed
-        newBankAccountDTO.overDraftLimit = bankAccountDTO.overDraftLimit
+        newBankAccountDTO.currency = self.currency
+        newBankAccountDTO.isOverdraftAllowed = self.isOverdraftAllowed
+        newBankAccountDTO.overDraftLimit = self.overDraftLimit
         return newBankAccountDTO
     }
 
@@ -96,6 +96,7 @@ enum PiggyBankError: Error {
     case accountAlreadyExists
     case unknownAccount
     case inconsistentCurrency
+    case differentCurrenciesInTransfer
     case insufficientAccountBalance(message: String)
     case insufficientOverdraftLimitExceeded
     case overDraftLimitUndefined

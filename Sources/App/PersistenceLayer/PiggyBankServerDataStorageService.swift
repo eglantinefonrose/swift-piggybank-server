@@ -19,7 +19,13 @@ class PiggyBankServerDataStorageService {
     private var currency: Expression<String>!
     private var isOverdraftAllowed: Expression<Int64>!
     private var overDraftLimit: Expression<Float64>!
-
+    private var transactions: Table!
+    private var transactionSenderBankAccountID: Expression<String>!
+    private var transactionRecipientAccountID: Expression<String>!
+    private var transactionPaymentAmount: Expression<Float64>!
+    private var transactionCurrency: Expression<String>!
+    private var transactionID: Expression<String>!
+    private var transactionDate: Expression<Int64>!
 
     init () {
         do {
@@ -32,6 +38,14 @@ class PiggyBankServerDataStorageService {
             currency = Expression<String>("currency")
             isOverdraftAllowed = Expression<Int64>("isOverdraftAllowed")
             overDraftLimit = Expression<Float64>("overdraftLimit")
+            
+            transactions = Table("Transactions")
+            transactionID = Expression<String>("id")
+            transactionSenderBankAccountID = Expression<String>("senderAccountID")
+            transactionRecipientAccountID = Expression<String>("recipientAccountID")
+            transactionPaymentAmount = Expression<Float64>("amount")
+            transactionCurrency = Expression<String>("currency")
+            transactionDate = Expression<Int64>("date")
 
             /*if (!UserDefaults.standard.bool(forKey: "is_db_created")) {
                 try db.run(bankAccountsDTO.create { (t) in
@@ -78,7 +92,7 @@ class PiggyBankServerDataStorageService {
 
     public func getBankAccountDTO(selectedAccountId:String) throws -> BankAccountDTO {
 
-        var bankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 0, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
+        var bankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 3, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
         
         do {
 
@@ -95,7 +109,7 @@ class PiggyBankServerDataStorageService {
                 let bankAccountisOverdraftAllowed = row[isOverdraftAllowed]
                 let bankAccounttheOverDraftLimit = row[overDraftLimit]
                 
-                bankAccountDTO = BankAccountDTO(theAccountId: bankAccountID, theAmount: Float64(Float(bankAccountAmount)), theCurrency: bankAccountCurrency, theFirstName: bankAccountFirstName, theLastName: bankAccountLastName, isOverdraftAllowed: Int(bankAccountisOverdraftAllowed), theOverDraftLimit: Float(bankAccounttheOverDraftLimit))
+                bankAccountDTO = BankAccountDTO(theAccountId: bankAccountID, theAmount: Float64(Float(bankAccountAmount)), theCurrency: bankAccountCurrency, theFirstName: bankAccountFirstName, theLastName: bankAccountLastName, isOverdraftAllowed: Int64(bankAccountisOverdraftAllowed), theOverDraftLimit: Float64(bankAccounttheOverDraftLimit))
                 print("firstName \(bankAccountFirstName)")
                 
                 return bankAccountDTO
@@ -105,7 +119,11 @@ class PiggyBankServerDataStorageService {
                 throw PiggyBankError.unknownAccount
             }
             
+        } catch let error as PiggyBankError {
+            // If the error is already a PiggyBank error (ie thrown by our code), we re-throw it as-is
+            throw error
         } catch {
+            // If the error is any other error, we throw a 'PiggyBankError.technicalError'
             throw PiggyBankError.technicalError
         }
 
@@ -113,18 +131,91 @@ class PiggyBankServerDataStorageService {
 
     }
     
-    public func test() throws {
+    
+    public func getAllSenderTransactions(selectedAccountId:String) throws -> [TransactionDTO] {
+
+        var transactionsList : [TransactionDTO] = []
+        
+        do {
+
+            // Requête pour récupérer la ligne où le champ "accountId" est "selectedAccountId"
+            let query = transactions.filter(transactionSenderBankAccountID == selectedAccountId)
+            
+            // Exécution de la requête et récupération du résultat
+            
+            for row in try db.prepare(query) {
+                let transactionID = row[transactionID]
+                let transactionSenderBankAccountID = row[transactionSenderBankAccountID]
+                let transactionRecipientBankAccountID = row[transactionRecipientAccountID]
+                let transactionPaymentAmount = row[transactionPaymentAmount]
+                let transactionCurrency = row[transactionCurrency]
+                let transactionDate = row[transactionDate]
+                
+                transactionsList.append(TransactionDTO(theId: transactionID, theSenderAccountID: transactionSenderBankAccountID, theRecipientAccountID: transactionRecipientBankAccountID, theAmount: transactionPaymentAmount, theCurrency: transactionCurrency, theDate: transactionDate))
+            }
+            
+        } catch let error as PiggyBankError {
+            // If the error is already a PiggyBank error (ie thrown by our code), we re-throw it as-is
+            throw error
+        } catch {
+            // If the error is any other error, we throw a 'PiggyBankError.technicalError'
+            throw PiggyBankError.technicalError
+        }
+
+        return transactionsList
+
+    }
+    
+    public func getAllRecipientTransactions(selectedAccountId:String) throws -> [TransactionDTO] {
+
+        var transactionsList : [TransactionDTO] = []
+        
+        do {
+
+            // Requête pour récupérer la ligne où le champ "accountId" est "selectedAccountId"
+            let query = transactions.filter(transactionRecipientAccountID == selectedAccountId)
+            
+            // Exécution de la requête et récupération du résultat
+            
+            for row in try db.prepare(query) {
+                let transactionID = row[transactionID]
+                let transactionSenderBankAccountID = row[transactionSenderBankAccountID]
+                let transactionRecipientBankAccountID = row[transactionRecipientAccountID]
+                let transactionPaymentAmount = row[transactionPaymentAmount]
+                let transactionCurrency = row[transactionCurrency]
+                let transactionDate = row[transactionDate]
+                
+                transactionsList.append(TransactionDTO(theId: transactionID, theSenderAccountID: transactionSenderBankAccountID, theRecipientAccountID: transactionRecipientBankAccountID, theAmount: transactionPaymentAmount, theCurrency: transactionCurrency, theDate: transactionDate))
+            }
+            
+        } catch let error as PiggyBankError {
+            // If the error is already a PiggyBank error (ie thrown by our code), we re-throw it as-is
+            throw error
+        } catch {
+            // If the error is any other error, we throw a 'PiggyBankError.technicalError'
+            throw PiggyBankError.technicalError
+        }
+
+        return transactionsList
+
+    }
+    
+    
+    public func createABankAccountDTO(theAccountId: String, theFirstName: String, theLastName: String, theAccountBalance: Float64, theCurrency: String, isTheOverdraftAllowed: Int64, theOverDraftLimit: Float64) throws -> BankAccountDTO {
         
         do {
             try db.run(bankAccountsDTO.insert (
-                accountId <- "454U3I54",
-                firstName <- "Malo",
-                lastName <- "Fonrose",
-                accountBalance <- 0,
-                currency <- "EUR",
-                isOverdraftAllowed <- 0,
-                overDraftLimit <- 0
+                accountId <- theAccountId,
+                firstName <- theFirstName,
+                lastName <- theLastName,
+                accountBalance <- theAccountBalance,
+                currency <- theCurrency,
+                isOverdraftAllowed <- isTheOverdraftAllowed,
+                overDraftLimit <- theOverDraftLimit
             ))
+            
+            return BankAccountDTO(theAccountId: theAccountId, theAmount: theAccountBalance, theCurrency: theCurrency, theFirstName: theFirstName, theLastName: theLastName, isOverdraftAllowed: isTheOverdraftAllowed, theOverDraftLimit: theOverDraftLimit)
+            
         }
         catch {
             throw PiggyBankError.technicalError
@@ -133,9 +224,7 @@ class PiggyBankServerDataStorageService {
     }
     
     func makePayment(selectedBankAccountID: String, thePaymentAmount: Float64, theCurrency: String) throws -> BankAccountDTO {
-        
-        let date = Date(timeIntervalSinceNow: 0)
-        
+                
         do {
             // Charge l'état actuel du compte bancaire depuis la base de données
             let bankAccount = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: selectedBankAccountID)
@@ -147,7 +236,7 @@ class PiggyBankServerDataStorageService {
             }
 
             let bankAccountAmount = bankAccount.getAccountBalance() - thePaymentAmount
-            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)))
             let oldBankAccountDTO = bankAccountsDTO.filter(accountId == selectedBankAccountID)
             try db.run(oldBankAccountDTO.delete())
             
@@ -166,15 +255,15 @@ class PiggyBankServerDataStorageService {
             return try getBankAccountDTO(selectedAccountId: selectedBankAccountID)
                 
         }
-        catch {
-            throw PiggyBankError.unknownAccount
+        catch let error {
+            throw error
         }
         
     }
     
     func addMoney(selectedBankAccountID: String, thePaymentAmount: Float64, theCurrency: String) throws -> BankAccountDTO {
         
-        let date = Date(timeIntervalSinceNow: 0)
+        //let date = Date(timeIntervalSinceNow: 0)
         
         do {
             // Charge l'état actuel du compte bancaire depuis la base de données
@@ -184,7 +273,7 @@ class PiggyBankServerDataStorageService {
             if thePaymentAmount > 100000 { throw PiggyBankError.abnormallyHighSum }
 
             let bankAccountAmount = bankAccount.getAccountBalance() + thePaymentAmount
-            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)))
             let oldBankAccountDTO = bankAccountsDTO.filter(accountId == selectedBankAccountID)
             try db.run(oldBankAccountDTO.delete())
             
@@ -208,6 +297,72 @@ class PiggyBankServerDataStorageService {
         }
         
     }
+    
+    
+    func transferMoney(senderBankAccountID: String, recipientBankAccountID: String, thePaymentAmount: Float64, theCurrency: String) throws -> BankAccountDTO {
+        
+        do {
+            // Charge l'état actuel du compte bancaire depuis la base de données
+            let recipientBankAccountDTO = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: recipientBankAccountID)
+            let senderBankAccountDTO = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: senderBankAccountID)
+            
+            guard (theCurrency == senderBankAccountDTO.getCurrency()) else { throw PiggyBankError.inconsistentCurrency }
+            if ( (senderBankAccountDTO.getOverdraftAuthorization()==1) && (Int((senderBankAccountDTO.getAccountBalance() - thePaymentAmount)) < Int(senderBankAccountDTO.getOverdraftLimit())) ) { throw PiggyBankError.insufficientOverdraftLimitExceeded }
+            if ( (senderBankAccountDTO.getOverdraftAuthorization()==0) && (senderBankAccountDTO.getAccountBalance() < thePaymentAmount) )                       {
+                throw PiggyBankError.insufficientAccountBalance(message:"You would need \(thePaymentAmount - senderBankAccountDTO.getAccountBalance()) more \(senderBankAccountDTO.getCurrency()) on your account")
+            }
+            if thePaymentAmount > 100000 { throw PiggyBankError.abnormallyHighSum }
+
+            let senderBankAccountAmount = senderBankAccountDTO.getAccountBalance() - thePaymentAmount
+            let newSenderBankAccountDTO = senderBankAccountDTO.setAccountBalance(newAccountBalance: Float64(Float(senderBankAccountAmount)))
+            let oldSenderBankAccountDTO = bankAccountsDTO.filter(accountId == senderBankAccountID)
+            try db.run(oldSenderBankAccountDTO.delete())
+            
+            try db.run(bankAccountsDTO.insert (
+                accountId <- senderBankAccountID,
+                firstName <- newSenderBankAccountDTO.getAccountOwnerFirstName(),
+                lastName <- newSenderBankAccountDTO.getAccountOwnerLastName(),
+                accountBalance <- newSenderBankAccountDTO.getAccountBalance(),
+                currency <- newSenderBankAccountDTO.getCurrency(),
+                isOverdraftAllowed <- newSenderBankAccountDTO.getOverdraftAuthorization(),
+                overDraftLimit <- newSenderBankAccountDTO.getOverdraftLimit()
+            ))
+            
+            let recipientBankAccountAmount = recipientBankAccountDTO.getAccountBalance() + thePaymentAmount
+            let newRecipientBankAccountDTO = recipientBankAccountDTO.setAccountBalance(newAccountBalance: Float64(Float(recipientBankAccountAmount)))
+            let oldRecipientBankAccountDTO = bankAccountsDTO.filter(accountId == recipientBankAccountID)
+            try db.run(oldRecipientBankAccountDTO.delete())
+            
+            try db.run(bankAccountsDTO.insert (
+                accountId <- recipientBankAccountID,
+                firstName <- newRecipientBankAccountDTO.getAccountOwnerFirstName(),
+                lastName <- newRecipientBankAccountDTO.getAccountOwnerLastName(),
+                accountBalance <- newRecipientBankAccountDTO.getAccountBalance(),
+                currency <- newRecipientBankAccountDTO.getCurrency(),
+                isOverdraftAllowed <- newRecipientBankAccountDTO.getOverdraftAuthorization(),
+                overDraftLimit <- newRecipientBankAccountDTO.getOverdraftLimit()
+            ))
+            
+            try db.run(transactions.insert(
+                transactionID <- UUID().uuidString,
+                transactionSenderBankAccountID <- senderBankAccountID,
+                transactionRecipientAccountID <- recipientBankAccountID,
+                transactionPaymentAmount <- thePaymentAmount,
+                transactionCurrency <- theCurrency,
+                transactionDate <- jdFromDate(date: .now)
+            ))
+            
+            //print("L'ajout d'un montant de \(thePaymentAmount) \(senderCurrency) realisé avec succès du compte \(senderBankAccountID) vers le compte \(recipientBankAccountID)")
+            print("Nouveau solde de l'envoyeur : \(newSenderBankAccountDTO.getAccountBalance())")
+            return (try getBankAccountDTO(selectedAccountId: senderBankAccountID))
+                
+        }
+        catch {
+            throw PiggyBankError.unknownAccount
+        }
+        
+    }
+    
     
     /*public func updateAccountBalanceInDb(selectedBankAccountID: String, paymentAmount: Float, theCurrency: String) throws -> BankAccountDTO {
         
@@ -263,5 +418,10 @@ class PiggyBankServerDataStorageService {
     public static var shared = PiggyBankServerDataStorageService()  // BigModel(shouldInjectMockedData:true)
 
 
+}
+
+func jdFromDate(date : Date) -> Int64 {
+    let JD_JAN_1_1970_0000GMT = 2440587.5
+    return Int64(JD_JAN_1_1970_0000GMT + date.timeIntervalSince1970 / 86400)
 }
 

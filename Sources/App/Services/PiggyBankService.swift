@@ -25,7 +25,7 @@ public struct PiggyBankService {
     ///     case overDraftLimitUndefined
     ///     case overDraftMustBeNegative
     ///
-    func createBankAccount(accountId: String, amount: Float, currency: String, firstName: String, lastName: String, isOverdraftAllowed: Int, overDraftLimit: Float?) throws -> BankAccountDTO {
+    func createBankAccount(accountId: String, amount: Float, currency: String, firstName: String, lastName: String, isOverdraftAllowed: Int64, overDraftLimit: Float64?) throws -> BankAccountDTO {
         
         if ( (isOverdraftAllowed == 1) && (overDraftLimit == nil) )                                     { throw PiggyBankError.overDraftLimitUndefined }
         if ( (isOverdraftAllowed == 1) && (overDraftLimit! > 0) )                                       { throw PiggyBankError.overDraftMustBeNegative }
@@ -108,7 +108,7 @@ public struct PiggyBankService {
             if ( thePaymentAmount > 100000 ) { throw PiggyBankError.abnormallyHighSum }
 
             let bankAccountAmount = bankAccount.getAccountBalance() + thePaymentAmount
-            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)), bankAccountDTO: bankAccount)
+            let newBankAccountDTO = bankAccount.setAccountBalance(newAccountBalance: Float64(Float(bankAccountAmount)))
             print("Ajout d'argent réalisé avec succès d'un montant de \(thePaymentAmount) \(currency) sur le compte \(accountId) à \(date)")
             
             return newBankAccountDTO
