@@ -268,16 +268,16 @@ class PiggyBankServerDataStorageService {
     }
     
     
-    func transferMoney(senderBankAccountID: String, recipientBankAccountID: String, thePaymentAmount: Float64, theCurrency: String) throws -> BankAccountDTO {
+    func transferMoney(senderBankAccountID: String, recipientBankAccountID: String, thePaymentAmount: Float64/*, theCurrency: String*/) throws -> BankAccountDTO {
         
         do {
             // Charge l'état actuel du compte bancaire depuis la base de données
             let recipientBankAccountDTO = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: recipientBankAccountID)
             let senderBankAccountDTO = try PiggyBankServerDataStorageService.shared.getBankAccountDTO(selectedAccountId: senderBankAccountID)
+            let convertedPaymentAmount = try PiggyBankService.shared.moneyConvertor(amount: thePaymentAmount, oldCurrency: senderBankAccountDTO.getCurrency(), newCurrency: recipientBankAccountDTO.getCurrency())
             
-            guard (theCurrency == senderBankAccountDTO.getCurrency()) else { throw PiggyBankError.inconsistentCurrency }
-            if ( (senderBankAccountDTO.getOverdraftAuthorization()==1) && (Int((senderBankAccountDTO.getAccountBalance() - thePaymentAmount)) < Int(senderBankAccountDTO.getOverdraftLimit())) ) { throw PiggyBankError.insufficientOverdraftLimitExceeded }
-            if ( (senderBankAccountDTO.getOverdraftAuthorization()==0) && (senderBankAccountDTO.getAccountBalance() < thePaymentAmount) )                       {
+            if ( (senderBankAccountDTO.getOverdraftAuthorization()==1) && (Int((senderBankAccountDTO.getAccountBalance() - convertedPaymentAmount)) < Int(senderBankAccountDTO.getOverdraftLimit())) ) { throw PiggyBankError.insufficientOverdraftLimitExceeded }
+            if ( (senderBankAccountDTO.getOverdraftAuthorization()==0) && (senderBankAccountDTO.getAccountBalance() < convertedPaymentAmount) )                       {
                 throw PiggyBankError.insufficientAccountBalance(message:"You would need \(thePaymentAmount - senderBankAccountDTO.getAccountBalance()) more \(senderBankAccountDTO.getCurrency()) on your account")
             }
             if thePaymentAmount > 100000 { throw PiggyBankError.abnormallyHighSum }
@@ -297,7 +297,7 @@ class PiggyBankServerDataStorageService {
                 overDraftLimit <- newSenderBankAccountDTO.getOverdraftLimit()
             ))
             
-            let recipientBankAccountAmount = recipientBankAccountDTO.getAccountBalance() + thePaymentAmount
+            let recipientBankAccountAmount = recipientBankAccountDTO.getAccountBalance() + convertedPaymentAmount
             let newRecipientBankAccountDTO = recipientBankAccountDTO.setAccountBalance(newAccountBalance: Float64(Float(recipientBankAccountAmount)))
             let oldRecipientBankAccountDTO = bankAccountsDTO.filter(accountId == recipientBankAccountID)
             try db.run(oldRecipientBankAccountDTO.delete())
@@ -316,8 +316,8 @@ class PiggyBankServerDataStorageService {
                 transactionID <- UUID().uuidString,
                 transactionSenderBankAccountID <- senderBankAccountID,
                 transactionRecipientAccountID <- recipientBankAccountID,
-                transactionPaymentAmount <- thePaymentAmount,
-                transactionCurrency <- theCurrency,
+                transactionPaymentAmount <- convertedPaymentAmount,
+                transactionCurrency <- recipientBankAccountDTO.getCurrency(),
                 transactionDate <- Int64(NSDate().timeIntervalSince1970)
             ))
             
@@ -327,7 +327,7 @@ class PiggyBankServerDataStorageService {
                 
         }
         catch {
-            throw PiggyBankError.unknownAccount
+            throw PiggyBankError.technicalError
         }
         
     }

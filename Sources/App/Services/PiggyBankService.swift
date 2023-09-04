@@ -121,6 +121,35 @@ public struct PiggyBankService {
     }
     
     
+    func moneyConvertor(amount: Float64, oldCurrency: String, newCurrency: String) throws -> Float64 {
+        
+        if oldCurrency == newCurrency {
+            return amount
+        }
+        if oldCurrency == "EUR" {
+            if newCurrency == "DOLLARDS" {
+                return amount*1.09
+            }
+            if newCurrency == "LIVRE" {
+                return amount*0.86
+            }
+            if newCurrency == "YEN" {
+                return amount*157.84
+            }
+            if newCurrency == "WON" {
+                return amount*1430.66
+            }
+        }
+        if oldCurrency == "YEN" {
+            if newCurrency == "EUR" {
+                return amount*0.0063
+            }
+        }
+        
+        throw PiggyBankError.unknownCurrency
+        
+    }
+    
     
     //
     //

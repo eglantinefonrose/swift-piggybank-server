@@ -63,14 +63,13 @@ func routes(_ app: Application) throws {
         
     }
     
-    app.get("transferMoney", "fromAccount", ":senderAccountID", "toAccount", ":recipientAccountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
+    app.get("transferMoney", "fromAccount", ":senderAccountID", "toAccount", ":recipientAccountId", "withAmount", ":amount") { req async throws -> BankAccountDTO in
                 
         let senderAccountID = req.parameters.get("senderAccountID")!
         let recipientAccountId = req.parameters.get("recipientAccountId")!
         let amount : Float64  = Float64(req.parameters.get("amount")!) ?? -13.37
-        let currency = req.parameters.get("currency")!
         
-        return try PiggyBankServerDataStorageService.shared.transferMoney(senderBankAccountID: senderAccountID, recipientBankAccountID: recipientAccountId, thePaymentAmount: amount, theCurrency: currency)
+        return try PiggyBankServerDataStorageService.shared.transferMoney(senderBankAccountID: senderAccountID, recipientBankAccountID: recipientAccountId, thePaymentAmount: amount)
         
     }
     
