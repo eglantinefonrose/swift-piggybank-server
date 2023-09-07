@@ -85,10 +85,11 @@ func routes(_ app: Application) throws {
         }
     }
 
-    app.get("getTransactions", ":accountId") { req async throws -> [TransactionDTO] in
+    app.get("getTransactions", ":accountId", "inCurrency", ":currency") { req async throws -> [TransactionDTO] in
         let accountId = req.parameters.get("accountId")!
+        let currency = req.parameters.get("currency")!
         do {
-            return try PiggyBankServerDataStorageService.shared.getAllTransactions(selectedAccountId: accountId)
+            return try PiggyBankServerDataStorageService.shared.getAllTransactions(selectedAccountId: accountId, currency: currency)
         } catch {
             print("RROR GRVE")
             throw PiggyBankError.technicalError
