@@ -29,7 +29,7 @@ class PiggyBankServerDataStorageService {
 
     init () {
         do {
-            db = try Connection("/Users/eglantine/Dev/0.perso/2.Proutechos/PiggyBank/PiggyDataBase.db")
+            db = try Connection("/Users/eglantine/Dev/0.perso/2.Proutechos/0.PiggyBank/0.PiggyBank/PiggyDataBase.db")
             bankAccountsDTO = Table("BankAccountDTO")
             accountId = Expression<String>("accountId")
             firstName = Expression<String>("firstName")
