@@ -127,20 +127,25 @@ public struct PiggyBankService {
             return amount
         }
         if oldCurrency == "EUR" {
-            if newCurrency == "DOLLARDS" {
+            if newCurrency == "USD" {
                 return amount*1.09
             }
-            if newCurrency == "LIVRE" {
+            if newCurrency == "GBP" {
                 return amount*0.86
             }
-            if newCurrency == "YEN" {
+            if newCurrency == "JPY" {
                 return amount*157.84
             }
-            if newCurrency == "WON" {
-                return amount*1430.66
+            if newCurrency == "KRW" {
+                print("KRW")
+                return amount*14
+                //return 3
+            }
+            else {
+                print("unknown old currency")
             }
         }
-        if oldCurrency == "YEN" {
+        if oldCurrency == "KRW" {
             if newCurrency == "EUR" {
                 return amount*0.0063
             }

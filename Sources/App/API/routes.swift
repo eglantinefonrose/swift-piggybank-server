@@ -27,7 +27,6 @@ func routes(_ app: Application) throws {
         return "<html><h2><b>Salug \(name)</b></h2> [\(timeEpoch)]!</html>"
     }
     
-    
     // makePayment/toAccount/231231231/withAmount/120/EUR
     app.get("makePayment", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
