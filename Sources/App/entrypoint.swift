@@ -24,13 +24,25 @@ private extension Vapor.Application {
 enum Entrypoint {
     
     static func main() async throws {
+        
+//        // Vérifiez s'il y a suffisamment d'arguments
+//        guard CommandLine.argc == 2 else {
+//            print("\n   PiggyBankServer usage: \(CommandLine.arguments[0]) <serverPortNumber>\n")
+//            return
+//        }
+//        // Récupérez l'argument entier depuis la ligne de commande
+//        guard let serverPortNumber = Int(CommandLine.arguments[1]) else {
+//            print("L'argument 'serverPortNumber' doit être un entier valide.")
+//            return
+//        }
+        
         var env = try Environment.detect()
         try LoggingSystem.bootstrap(from: &env)
-        
         let app = Application(env)
         
         // Make the server listen on all IP addresses of the machine
-        app.http.server.configuration.hostname = "0.0.0.0"
+        app.http.server.configuration.hostname = "0.0.0.0";
+        app.http.server.configuration.port = 8080;
 
         defer { app.shutdown() }
         

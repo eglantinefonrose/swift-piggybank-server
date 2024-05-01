@@ -14,11 +14,12 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "App",
+            name: "PiggyBankServerApp",
             dependencies: [
               .product(name: "Vapor", package: "vapor"),
               .product(name: "SQLite", package: "SQLite.swift")
             ],
+            path: "Sources/App",
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
                 // the `.unsafeFlags` construct required by SwiftPM, this flag is recommended for Release
@@ -26,9 +27,12 @@ let package = Package(
                 .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
             ]
         ),
-        .testTarget(name: "AppTests", dependencies: [
-            .target(name: "App"),
-            .product(name: "XCTVapor", package: "vapor"),
-        ])
+        .testTarget(name: "PiggyBankServerAppTests",
+            dependencies: [
+                .target(name: "PiggyBankServerApp"),
+                .product(name: "XCTVapor", package: "vapor"),
+            ],
+            path: "Tests/AppTests"
+        )
     ]
 )
