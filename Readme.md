@@ -1,5 +1,5 @@
 
-# Notes sur PiggybBank Server
+# Notes sur PiggyBank Server
 
 ## Appel de l'API curl
 
