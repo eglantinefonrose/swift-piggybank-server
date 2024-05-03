@@ -24,7 +24,7 @@ func routes(_ app: Application) throws {
         let currency  = req.parameters.get("currency")!
         guard let accountBalance = Float64(req.parameters.get("accountBalance")!) else { throw PiggyBankError.invalidParameters(message: "Invalid accountBalance=[\(req.parameters.get("accountBalance")!)]") }
 
-        return try PiggyBankService.shared.createBankAccount(accountId: accountId, amount: 0, currency: currency, firstName: firstName, lastName: lastName)
+        return try PiggyBankService.shared.createBankAccount(accountId: accountId, amount: accountBalance, currency: currency, firstName: firstName, lastName: lastName)
         
     }
     
@@ -40,7 +40,7 @@ func routes(_ app: Application) throws {
         guard let overdraftAuthorization =   Int64(req.parameters.get("overdraftAuthorization")!) else { throw PiggyBankError.invalidParameters(message: "Invalid overdraftAuthorization=[\(req.parameters.get("overdraftAuthorization")!)]") }
         guard let overdraftLimit         = Float64(req.parameters.get("overdraftLimit")!) else         { throw PiggyBankError.invalidParameters(message: "Invalid overdraftLimit=[\(req.parameters.get("overdraftLimit")!)]") }
 
-        return try PiggyBankService.shared.createBankAccount(accountId: accountId, amount: 0, currency: currency, firstName: firstName, lastName: lastName, isOverdraftAllowed: overdraftAuthorization, overdraftLimit: overdraftLimit)
+        return try PiggyBankService.shared.createBankAccount(accountId: accountId, amount: accountBalance, currency: currency, firstName: firstName, lastName: lastName, isOverdraftAllowed: overdraftAuthorization, overdraftLimit: overdraftLimit)
         
     }
     
