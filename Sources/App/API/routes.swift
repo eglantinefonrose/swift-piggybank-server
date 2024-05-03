@@ -15,8 +15,8 @@ func routes(_ app: Application) throws {
     }
 
     
-    // curl -s -X GET "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR"
-    app.get("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", ":currency") { req async throws -> BankAccountDTO in
+    // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR"
+    app.put("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", ":currency") { req async throws -> BankAccountDTO in
         
         let accountId = req.parameters.get("accountId")!
         let firstName = req.parameters.get("firstName")!
@@ -29,8 +29,8 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X GET "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR/withOverdraftAuthorization/:overdraftAuthorization/withOverdraftLimit/:overdraftLimit") { req async throws -> BankAccountDTO in
-    app.get("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", "currency", ":theCurrency", "withOverdraftAuthorization", ":overdraftAuthorization", "withOverdraftLimit", ":overdraftLimit") { req async throws -> BankAccountDTO in
+    // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR/withOverdraftAuthorization/:overdraftAuthorization/withOverdraftLimit/:overdraftLimit") { req async throws -> BankAccountDTO in
+    app.put("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", "currency", ":theCurrency", "withOverdraftAuthorization", ":overdraftAuthorization", "withOverdraftLimit", ":overdraftLimit") { req async throws -> BankAccountDTO in
     
         let accountId = req.parameters.get("accountId")!
         let firstName = req.parameters.get("firstName")!
@@ -45,8 +45,8 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X GET "http://localhost:8181/makePayment/fromAccount/231231231/withAmount/120/EUR
-    app.get("makePayment", "fromAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
+    // curl -s -X POST "http://localhost:8181/makePayment/fromAccount/231231231/withAmount/120/EUR
+    app.post("makePayment", "fromAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
         let accountId = req.parameters.get("accountId")!
         let currency = req.parameters.get("currency")!
@@ -58,8 +58,8 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X GET "http://localhost:8181/makeDeposit/toAccount/231231231/withAmount/120/EUR
-    app.get("makeDeposit", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
+    // curl -s -X POST "http://localhost:8181/makeDeposit/toAccount/231231231/withAmount/120/EUR
+    app.post("makeDeposit", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
         let accountId = req.parameters.get("accountId")!
         let currency = req.parameters.get("currency")!
@@ -71,8 +71,8 @@ func routes(_ app: Application) throws {
     }
 
     
-    // curl -s -X GET "http://localhost:8181/transferMoney/fromAccount/231231231/toAccount/5672357234/withAmount/120"
-    app.get("transferMoney", "fromAccount", ":senderAccountID", "toAccount", ":recipientAccountId", "withAmount", ":amount") { req async throws -> BankAccountDTO in
+    // curl -s -X POST "http://localhost:8181/transferMoney/fromAccount/231231231/toAccount/5672357234/withAmount/120"
+    app.post("transferMoney", "fromAccount", ":senderAccountID", "toAccount", ":recipientAccountId", "withAmount", ":amount") { req async throws -> BankAccountDTO in
                 
         let senderAccountID = req.parameters.get("senderAccountID")!
         let recipientAccountId = req.parameters.get("recipientAccountId")!
