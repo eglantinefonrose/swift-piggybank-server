@@ -4,7 +4,6 @@ func routes(_ app: Application) throws {
     
     
     // curl -s -X GET "http://localhost:8181/hello/gnu"
-    // Remaque: C'est une route d'exemple qui renvoie explicitement la réponse HTTP
     app.get("hello", "gnu") { req async -> Response in
         let timeEpoch = Int(NSDate().timeIntervalSince1970)
         print("Eglant la fouine [\(timeEpoch)]")
@@ -26,7 +25,7 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR"
+    // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR" | jq .
     app.put("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", ":currency") { req async throws -> BankAccountDTO in
         
         let accountId = req.parameters.get("accountId")!
@@ -40,7 +39,7 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR/withOverdraftAuthorization/:overdraftAuthorization/withOverdraftLimit/:overdraftLimit") { req async throws -> BankAccountDTO in
+    // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR/withOverdraftAuthorization/:overdraftAuthorization/withOverdraftLimit/:overdraftLimit") | jq .
     app.put("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", "currency", ":theCurrency", "withOverdraftAuthorization", ":overdraftAuthorization", "withOverdraftLimit", ":overdraftLimit") { req async throws -> BankAccountDTO in
     
         let accountId = req.parameters.get("accountId")!
@@ -56,7 +55,7 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X POST "http://localhost:8181/makePayment/fromAccount/231231231/withAmount/120/EUR
+    // curl -s -X POST "http://localhost:8181/makePayment/fromAccount/231231231/withAmount/120/EUR | jq .
     app.post("makePayment", "fromAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
         let accountId = req.parameters.get("accountId")!
@@ -69,7 +68,7 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X POST "http://localhost:8181/makeDeposit/toAccount/231231231/withAmount/120/EUR
+    // curl -s -X POST "http://localhost:8181/makeDeposit/toAccount/231231231/withAmount/120/EUR | jq .
     app.post("makeDeposit", "toAccount", ":accountId", "withAmount", ":amount", ":currency") { req async throws -> BankAccountDTO in
                 
         let accountId = req.parameters.get("accountId")!
@@ -82,7 +81,7 @@ func routes(_ app: Application) throws {
     }
 
     
-    // curl -s -X POST "http://localhost:8181/transferMoney/fromAccount/231231231/toAccount/5672357234/withAmount/120"
+    // curl -s -X POST "http://localhost:8181/transferMoney/fromAccount/231231231/toAccount/5672357234/withAmount/120" | jq .
     app.post("transferMoney", "fromAccount", ":senderAccountID", "toAccount", ":recipientAccountId", "withAmount", ":amount") { req async throws -> BankAccountDTO in
                 
         let senderAccountID = req.parameters.get("senderAccountID")!
@@ -95,7 +94,7 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X GET "http://localhost:8181/getBankAccount/231231231"
+    // curl -s -X GET "http://localhost:8181/getBankAccount/231231231" | jq .
     app.get("getBankAccount", ":accountId") { req async throws -> BankAccountDTO in
         
         let accountId = req.parameters.get("accountId")!
@@ -105,7 +104,7 @@ func routes(_ app: Application) throws {
     }
     
     
-    // curl -s -X GET "http://localhost:8181/getTransactions/231231231/inCurrency/EUR"
+    // curl -s -X GET "http://localhost:8181/getTransactions/231231231/inCurrency/EUR" | jq .
     app.get("getTransactions", ":accountId", "inCurrency", ":currency") { req async throws -> [TransactionDTO] in
         
         let accountId = req.parameters.get("accountId")!
