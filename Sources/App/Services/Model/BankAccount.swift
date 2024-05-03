@@ -29,12 +29,12 @@ public struct BankAccountDTO : Content {
     /// Construtor
     public init (theAccountId: String, theAmount: Float64, theCurrency: String, theFirstName: String, theLastName: String, isOverdraftAllowed: Int64, theOverDraftLimit: Float64?) {
         self.accountId = theAccountId
-        self.accountBalance = Float64(theAmount)
+        self.accountBalance = theAmount
         self.firstName = theFirstName
         self.lastName = theLastName
         self.currency = theCurrency
         self.isOverdraftAllowed = Int64(isOverdraftAllowed)
-        self.overDraftLimit = Float64(theCurrency)
+        self.overDraftLimit = ((isOverdraftAllowed == 1) ? theOverDraftLimit : nil);
     }
     
 
