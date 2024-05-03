@@ -72,9 +72,26 @@ class PiggyBankServerDataStorageService {
   
     
     /**
-     
+     Store the data for an account into the database
      */
-    func storeBankAccountInfo(accountToBeStored: BankAccountDTO) {
+    func storeBankAccountInfo(accountToBeStored: BankAccountDTO) throws {
+        
+        do {
+            print("PiggyBankServerDataStorageService.storeBankAccountInfo - accountId[\(accountToBeStored.getAccountAccountId())] ...");
+            try dbConnection.run(bankAccountsTable.insert (
+                accountIdColumn <- accountToBeStored.getAccountAccountId(),
+                firstNameColumn <- accountToBeStored.getAccountOwnerFirstName(),
+                lastNameColumn <- accountToBeStored.getAccountOwnerLastName(),
+                accountBalanceColumn <- accountToBeStored.getAccountBalance(),
+                currencyColumn <- accountToBeStored.getCurrency(),
+                isOverdraftAllowedColumn <- accountToBeStored.getOverdraftAuthorization(),
+                overDraftLimitColumn <- accountToBeStored.getOverdraftLimit()
+            ))
+            print("  -> DONE (account storage for accountId[\(accountToBeStored.getAccountAccountId())]");
+        }
+        catch {
+            throw PiggyBankError.technicalError
+        }
         
     }
   

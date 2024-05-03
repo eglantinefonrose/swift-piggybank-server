@@ -53,7 +53,7 @@ public struct PiggyBankService {
         
         // Crée le nouveau compte
         let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: Float64(amount), theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overdraftLimit);
-        PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: theNewBankAccount)
+        try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: theNewBankAccount)
         
         return theNewBankAccount
         
@@ -83,7 +83,7 @@ public struct PiggyBankService {
         bankAccount.setAccountBalance(newAccountBalance: bankAccount.getAccountBalance()-amount)
 
         // Stocke la modification dans la base
-        PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: bankAccount)
+        try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: bankAccount)
         
         return bankAccount
         
@@ -112,7 +112,7 @@ public struct PiggyBankService {
 
         // Stocke la modification dans la base
         let date = Date(timeIntervalSinceNow: 0)
-        PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: bankAccount)
+        try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: bankAccount)
         print("Ajout d'argent réalisé avec succès d'un montant de \(amount) \(currency) sur le compte \(accountId) à \(date)")
 
         return bankAccount
