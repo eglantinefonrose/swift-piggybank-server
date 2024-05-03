@@ -19,14 +19,14 @@ class PiggyBankServerDataStorageService {
     private var accountBalanceColumn: Expression<Float64>!
     private var currencyColumn: Expression<String>!
     private var isOverdraftAllowedColumn: Expression<Int64>!
-    private var overDraftLimitColumn: Expression<Float64>!
+    private var overDraftLimitColumn: Expression<Float64?>!
     
     private var transactionsTable: Table!
+    private var transactionIDColumn: Expression<String>!
     private var transactionSenderBankAccountIDColumn: Expression<String>!
     private var transactionRecipientAccountIDColumn: Expression<String>!
     private var transactionPaymentAmountColumn: Expression<Float64>!
     private var transactionCurrencyColumn: Expression<String>!
-    private var transactionIDColumn: Expression<String>!
     private var transactionDateColumn: Expression<Int64>!
 
     
@@ -54,7 +54,7 @@ class PiggyBankServerDataStorageService {
                 let bankAccountisOverdraftAllowed = row[isOverdraftAllowedColumn]
                 let bankAccounttheOverDraftLimit = row[overDraftLimitColumn]
                 
-                let bankAccountDTO = BankAccountDTO(theAccountId: bankAccountID, theAmount: Float64(Float(bankAccountAmount)), theCurrency: bankAccountCurrency, theFirstName: bankAccountFirstName, theLastName: bankAccountLastName, isOverdraftAllowed: Int64(bankAccountisOverdraftAllowed), theOverDraftLimit: Float64(bankAccounttheOverDraftLimit))
+                let bankAccountDTO = BankAccountDTO(theAccountId: bankAccountID, theAmount: bankAccountAmount, theCurrency: bankAccountCurrency, theFirstName: bankAccountFirstName, theLastName: bankAccountLastName, isOverdraftAllowed: Int64(bankAccountisOverdraftAllowed), theOverDraftLimit: bankAccounttheOverDraftLimit)
                 
                 return bankAccountDTO
             } else {
@@ -65,7 +65,7 @@ class PiggyBankServerDataStorageService {
             throw error
         } catch {
             // If the error is any other error, we throw a 'PiggyBankError.technicalError'
-            print("PiggyBankServerDataStorageService.getBankAccountInfo - Erreur technique [\(error)]")
+            print("PiggyBankServerDataStorageService.getBankAccountInfo - Technical error [\(error)]")
             throw PiggyBankError.technicalError
         }
     }
@@ -85,11 +85,12 @@ class PiggyBankServerDataStorageService {
                 accountBalanceColumn <- accountToBeStored.getAccountBalance(),
                 currencyColumn <- accountToBeStored.getCurrency(),
                 isOverdraftAllowedColumn <- accountToBeStored.getOverdraftAuthorization(),
-                overDraftLimitColumn <- accountToBeStored.getOverdraftLimit()
+                overDraftLimitColumn <- ((accountToBeStored.getOverdraftAuthorization() == 1) ? accountToBeStored.getOverdraftLimit()! : nil)
             ))
             print("  -> DONE (account storage for accountId[\(accountToBeStored.getAccountAccountId())]");
         }
         catch {
+            print("PiggyBankServerDataStorageService.storeBankAccountInfo - Technical error [\(error)]")
             throw PiggyBankError.technicalError
         }
         
@@ -230,14 +231,14 @@ class PiggyBankServerDataStorageService {
         do {
             dbConnection = try Connection("/Users/eglantine/Dev/0.perso/2.Proutechos/0.PiggyBank/0.PiggyBank/PiggyDataBase.db")
             
-            bankAccountsTable = Table("BankAccountDTO")
+            bankAccountsTable = Table("BankAccounts")
             accountIdColumn = Expression<String>("accountId")
             firstNameColumn = Expression<String>("firstName")
             lastNameColumn = Expression<String>("lastName")
             accountBalanceColumn = Expression<Float64>("accountBalance")
             currencyColumn = Expression<String>("currency")
             isOverdraftAllowedColumn = Expression<Int64>("isOverdraftAllowed")
-            overDraftLimitColumn = Expression<Float64>("overdraftLimit")
+            overDraftLimitColumn = Expression<Float64?>("overdraftLimit")
             
             transactionsTable = Table("Transactions")
             transactionIDColumn = Expression<String>("id")
@@ -258,3 +259,4 @@ class PiggyBankServerDataStorageService {
 }
 
 
+ 

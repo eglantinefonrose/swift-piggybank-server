@@ -9,6 +9,7 @@ import Foundation
 
 
 public struct PiggyBankService {
+
     
     /**
      Create a new BankAccount (without authorization for overdrafts)
@@ -40,23 +41,27 @@ public struct PiggyBankService {
     */
     func createBankAccount(accountId: String, amount: Float64, currency: String, firstName: String, lastName: String, isOverdraftAllowed: Int64, overdraftLimit: Float64?) throws -> BankAccountDTO {
             
-        // Vérifie les prérequis
-        if ( (isOverdraftAllowed == 1) && (overdraftLimit == nil) )                                { throw PiggyBankError.overDraftLimitUndefined }
-        if ( (isOverdraftAllowed == 1) && (overdraftLimit! > 0) )                                  { throw PiggyBankError.overDraftMustBeNegative }
-        do {
-            // Teste si un compte avec cet ID existe déjà. Si l'appel 'getBankAccountInfo' reussi, on doit envoyer l'exception 'PiggyBankError.accountAlreadyExists'
-            let _ = try PiggyBankServerDataStorageService.shared.getBankAccountInfo(accountId: accountId)
-            throw PiggyBankError.accountAlreadyExists
-        } catch PiggyBankError.unknownAccount {
-            // On ne fait rien ici, puisque ça veut dire que "tout va bien" (ie un compte avec ce id n'existe pas déjà)
-        }
-        
-        // Crée le nouveau compte
+        // Create a new BankAccountDTO
         let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: amount, theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overdraftLimit);
-        try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: theNewBankAccount)
         
-        return theNewBankAccount
+        // Create the account
+        return try self.createBankAccount(bankAccountInfo: theNewBankAccount);
         
+    }
+    
+    
+    /**
+     Create a new BankAccount (without authorization for overdrafts)
+     
+     throws
+         PiggyBankError.overDraftLimitUndefined
+         PiggyBankError.overDraftMustBeNegative
+         PiggyBankError.accountAlreadyExists
+     */
+    func createBankAccount(bankAccountInfo: BankAccountDTO) throws -> BankAccountDTO {
+        
+        return try self.createBankAccountImpl(bankAccountInfo: bankAccountInfo);
+                
     }
 
 
@@ -185,7 +190,38 @@ public struct PiggyBankService {
     // IMPLEMENTATION
     //
     //
+
     
+    /**
+     Create a new BankAccount (without authorization for overdrafts)
+     
+     throws
+         PiggyBankError.overDraftLimitUndefined
+         PiggyBankError.overDraftMustBeNegative
+         PiggyBankError.accountAlreadyExists
+     */
+    private func createBankAccountImpl(bankAccountInfo: BankAccountDTO) throws -> BankAccountDTO {
+
+        // Vérifie les prérequis
+        if ( (bankAccountInfo.getOverdraftAuthorization() == 1) && (bankAccountInfo.getOverdraftLimit() == nil) )   { throw PiggyBankError.overDraftLimitUndefined }
+        if ( (bankAccountInfo.getOverdraftAuthorization() == 1) && (bankAccountInfo.getOverdraftLimit()! > 0) )     { throw PiggyBankError.overDraftMustBeNegative }
+        do {
+            // Teste si un compte avec cet ID existe déjà. Si l'appel 'getBankAccountInfo' reussi, on doit envoyer l'exception 'PiggyBankError.accountAlreadyExists'
+            let _ = try PiggyBankServerDataStorageService.shared.getBankAccountInfo(accountId: bankAccountInfo.getAccountAccountId())
+            throw PiggyBankError.accountAlreadyExists
+        } catch PiggyBankError.unknownAccount {
+            // On ne fait rien ici, puisque ça veut dire que "tout va bien" (ie un compte avec ce id n'existe pas déjà)
+        }
+
+        // Create the account at the storage layer
+        try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: bankAccountInfo)
+
+        // Retrieve the stored BankAccountInfo and return it to the caller
+        let successfulyStoredBankAccount = try PiggyBankServerDataStorageService.shared.getBankAccountInfo(accountId: bankAccountInfo.getAccountAccountId())
+        return successfulyStoredBankAccount
+
+    }
+
     
     /**
      Check that the account has enough balance or has large enough overdraft limit
@@ -196,7 +232,7 @@ public struct PiggyBankService {
      */
     private func assertAccountHasEnoughBalanceOrHasLargeEnoughOverdraftLimit(bankAccount: BankAccountDTO, amount: Float64) throws {
         //  - Montant découvert suffisant (si découvert autorisé)
-        if ( (bankAccount.getOverdraftAuthorization()==1) && (Int((bankAccount.getAccountBalance() - amount)) < Int(bankAccount.getOverdraftLimit())) ) {
+        if ( (bankAccount.getOverdraftAuthorization()==1) && (Int((bankAccount.getAccountBalance() - amount)) < Int(bankAccount.getOverdraftLimit()!)) ) {
             throw PiggyBankError.insufficientOverdraftLimitExceeded }
         //  - Montant suffisant sur le compte (si pas de découvert autorisé)
         if ( (bankAccount.getOverdraftAuthorization()==0) && (bankAccount.getAccountBalance() < amount) )                       {

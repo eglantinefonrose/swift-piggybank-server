@@ -10,7 +10,7 @@ import Vapor
 
 
 
-public struct BankAccountDTO : Content {
+public struct BankAccountDTO : Content, Codable {
     
     private var firstName: String
     private var lastName: String
@@ -67,7 +67,11 @@ public struct BankAccountDTO : Content {
         return self.isOverdraftAllowed
     }
     
-    public func getOverdraftLimit() -> Float64 {
+    public func getOverdraftLimit() -> Float64? {
+        return self.overDraftLimit
+    }
+    
+    public func getOverdraftLimitOrDefaultTo0() -> Float64 {
         return Float64(self.overDraftLimit ?? 0)
     }
 

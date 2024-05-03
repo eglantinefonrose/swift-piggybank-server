@@ -14,6 +14,17 @@ func routes(_ app: Application) throws {
             body: Response.Body(stringLiteral: "<html>\n\t<h2><b>Salut timeEpoch=[\(timeEpoch)]</b></h2>\n</html>\n"))
     }
 
+
+    
+    
+    // curl -s -X PUT "http://localhost:8181/initializeAccount" -H "Content-type: application/json" -d '{"firstName":"Eglantine","lastName":"Eglantine","accountId":"231231238","accountBalance":0,"currency":"EUR","isOverdraftAllowed":0}' | jq .
+    app.put("initializeAccount") { req async throws -> BankAccountDTO in
+
+        let bankAccountInfo = try req.content.decode(BankAccountDTO.self)
+        return try PiggyBankService.shared.createBankAccount(bankAccountInfo: bankAccountInfo)
+
+    }
+    
     
     // curl -s -X PUT "http://localhost:8181/initializeAccount/withAccountId/231231231/withFirstName/Eglantine/withLastName/Fonrose/withAccountBalance/1500/EUR"
     app.put("initializeAccount", "withAccountId", ":accountId", "withFirstName", ":firstName", "withLastName", ":lastName", "withAccountBalance", ":accountBalance", ":currency") { req async throws -> BankAccountDTO in
