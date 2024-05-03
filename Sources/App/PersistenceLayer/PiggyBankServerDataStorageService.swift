@@ -32,7 +32,7 @@ class PiggyBankServerDataStorageService {
     
 
     /**
-     Fetch the information for an account
+     Fetch the information for an account from the database
      
      throws
         case PiggyBankError.unknownAccount
@@ -97,7 +97,7 @@ class PiggyBankServerDataStorageService {
   
     
     /**
-     
+     Get all the transactions
      */
     public func getAllTransactions(accountId:String, currency: String) throws -> [TransactionDTO] {
         

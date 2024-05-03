@@ -18,7 +18,7 @@ public struct PiggyBankService {
          PiggyBankError.overDraftMustBeNegative
          PiggyBankError.accountAlreadyExists
      */
-    func createBankAccount(accountId: String, amount: Float, currency: String, firstName: String, lastName: String) throws -> BankAccountDTO {
+    func createBankAccount(accountId: String, amount: Float64, currency: String, firstName: String, lastName: String) throws -> BankAccountDTO {
         
         // Define the default parameters
         let isOverdraftAllowed: Int64 = 0;
@@ -38,7 +38,7 @@ public struct PiggyBankService {
         PiggyBankError.overDraftMustBeNegative
         PiggyBankError.accountAlreadyExists
     */
-    func createBankAccount(accountId: String, amount: Float, currency: String, firstName: String, lastName: String, isOverdraftAllowed: Int64, overdraftLimit: Float64?) throws -> BankAccountDTO {
+    func createBankAccount(accountId: String, amount: Float64, currency: String, firstName: String, lastName: String, isOverdraftAllowed: Int64, overdraftLimit: Float64?) throws -> BankAccountDTO {
             
         // Vérifie les prérequis
         if ( (isOverdraftAllowed == 1) && (overdraftLimit == nil) )                                { throw PiggyBankError.overDraftLimitUndefined }
@@ -47,12 +47,12 @@ public struct PiggyBankService {
             // Teste si un compte avec cet ID existe déjà. Si l'appel 'getBankAccountInfo' reussi, on doit envoyer l'exception 'PiggyBankError.accountAlreadyExists'
             let _ = try PiggyBankServerDataStorageService.shared.getBankAccountInfo(accountId: accountId)
             throw PiggyBankError.accountAlreadyExists
-        } catch {
+        } catch PiggyBankError.unknownAccount {
             // On ne fait rien ici, puisque ça veut dire que "tout va bien" (ie un compte avec ce id n'existe pas déjà)
         }
         
         // Crée le nouveau compte
-        let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: Float64(amount), theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overdraftLimit);
+        let theNewBankAccount = BankAccountDTO(theAccountId: accountId, theAmount: amount, theCurrency: currency, theFirstName: firstName, theLastName: lastName, isOverdraftAllowed: isOverdraftAllowed, theOverDraftLimit: overdraftLimit);
         try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: theNewBankAccount)
         
         return theNewBankAccount
