@@ -75,16 +75,8 @@ public struct BankAccountDTO : Content {
         return "\(self.accountBalance) \(self.currency)"
     }
     
-    public func setAccountBalance(newAccountBalance: Float64) -> BankAccountDTO {
-        var newBankAccountDTO: BankAccountDTO = BankAccountDTO(theAccountId: "", theAmount: 40, theCurrency: "", theFirstName: "", theLastName: "", isOverdraftAllowed: 0, theOverDraftLimit: 0)
-        newBankAccountDTO.firstName = self.firstName
-        newBankAccountDTO.lastName = self.lastName
-        newBankAccountDTO.accountId = self.accountId
-        newBankAccountDTO.accountBalance = newAccountBalance
-        newBankAccountDTO.currency = self.currency
-        newBankAccountDTO.isOverdraftAllowed = self.isOverdraftAllowed
-        newBankAccountDTO.overDraftLimit = self.overDraftLimit
-        return newBankAccountDTO
+    public mutating func setAccountBalance(newAccountBalance: Float64) {
+        self.accountBalance = newAccountBalance
     }
 
 }
@@ -105,4 +97,5 @@ enum PiggyBankError: Error {
     case unknownCurrency
     
     case technicalError
+    case invalidParameters(message: String)
 }
