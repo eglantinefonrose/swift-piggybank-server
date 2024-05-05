@@ -10,7 +10,7 @@ import Vapor
 
 
 
-public struct BankAccountDTO : Content, Codable {
+public struct BankAccountDTO : Content {
     
     private var firstName: String
     private var lastName: String

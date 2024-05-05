@@ -84,8 +84,11 @@ public struct PiggyBankService {
         //  - Compte suffisamment alimenté ou découvert autorisé suffisant (ce code renvoie des exceptions en cas de problème)
         try self.assertAccountHasEnoughBalanceOrHasLargeEnoughOverdraftLimit(bankAccount: bankAccount, amount: amount);
 
+        // Convertit le montant exprimée dans la devise passée en paramètres vers la devise du compte cible
+        let convertedAmount = try self.convertCurrency(amount: amount, fromCurrency: currency, toCurrency: bankAccount.getCurrency())
+        
         // Retranche le montant du paiement au compte
-        bankAccount.setAccountBalance(newAccountBalance: bankAccount.getAccountBalance()-amount)
+        bankAccount.setAccountBalance(newAccountBalance: bankAccount.getAccountBalance()-convertedAmount)
 
         // Stocke la modification dans la base
         try PiggyBankServerDataStorageService.shared.storeBankAccountInfo(accountToBeStored: bankAccount)
@@ -112,8 +115,11 @@ public struct PiggyBankService {
         //  - Limit maximum de dépot
         if amount > 100000 { throw PiggyBankError.abnormallyHighSum }
         
+        // Convertit le montant exprimée dans la devise passée en paramètres vers la devise du compte cible
+        let convertedAmount = try self.convertCurrency(amount: amount, fromCurrency: currency, toCurrency: bankAccount.getCurrency())
+        
         // Ajoute le montant du paiement au compte
-        bankAccount.setAccountBalance(newAccountBalance: bankAccount.getAccountBalance()+amount)
+        bankAccount.setAccountBalance(newAccountBalance: bankAccount.getAccountBalance()+convertedAmount)
 
         // Stocke la modification dans la base
         let date = Date(timeIntervalSinceNow: 0)
@@ -154,7 +160,7 @@ public struct PiggyBankService {
         
         do {
             // Calcul le montant dans la devise du compte recepteur
-            let convertedPaymentAmount = try PiggyBankService.shared.convertCurrency(amount: thePaymentAmount, fromCurrency: fromBankAccount.getCurrency(), toCurrency: toBankAccount.getCurrency())
+            //let convertedPaymentAmount = try PiggyBankService.shared.convertCurrency(amount: thePaymentAmount, fromCurrency: fromBankAccount.getCurrency(), toCurrency: toBankAccount.getCurrency())
             
             // Transfère l'argent entre les comptes
             try self.makePayment(fromBankAccountID: senderBankAccountID, forAnAmountOf: thePaymentAmount, withCurrency: fromBankAccount.getCurrency())
